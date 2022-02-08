@@ -28,15 +28,15 @@ def abc(times, a, b, c):
         result.append([g(times[i], a), g(times[i], b), g(times[i], c)])
     return result
 
+# a=tokens, b=apr, c=reserved
+def fee(abc, acc):
+    return (abc[0] - acc) * abc[1] * (1-abc[2]);
 
-def f(abc):
-    return abc[0] * abc[1] + abc[2];
 
-
-def fs(parameters):
+def fs(parameters, fun):
     result = []
     for i in range(len(parameters)):
-        result.append(f(parameters[i]))
+        result.append(fun(parameters[i]))
     return result
 
 def notBefore(t0, t1, t2):
@@ -46,27 +46,24 @@ def notBefore(t0, t1, t2):
         return t2-t0
     return 0
 
-def integral(t0, times, values):
-    result = 0
-    for i in range(len(values)):
-        result += notBefore(t0, times[i],  times[i+1]) * values[i]
-    return result
+def integral(t0, times, parameters, fun):
+    acc = 0
+    for i in range(len(parameters)):
+        value = fun(parameters[i], acc)
+        acc += notBefore(t0, times[i],  times[i+1]) * value
+    return acc
 
 
 # (t0, [ta, a0, a1], [tb, b0, b1], [tc, c0, c1], t4)
-def fees(t0, a, b, c, t4):
+def fees(t0, a, b, c, t4, fun):
     times = [t0, a[0], b[0], c[0]]
     bubbleSort(times)
     parameters = abc(times, a, b, c)
-    values = fs(parameters)
-    total = integral(t0, [*times, t4], values)
-    return total
+    return integral(t0, [*times, t4], parameters, fun)
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi(fees(0, [20, 1, 2], [10, 3, 4], [30, 5, 6], 40))
-    print_hi(fees(25, [20, 1, 2], [10, 3, 4], [30, 5, 6], 40))
-    print_hi(fees(40, [20, 1, 2], [10, 3, 4], [30, 5, 6], 40))
+    # a=tokens, b=apr, c=reserved
+    print_hi(fees(0, [0.5, 1000, 900], [0.5, 0.1, 0.2], [0.5, 0, 0.1], 1, fee))
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
